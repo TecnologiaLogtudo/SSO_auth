@@ -50,6 +50,12 @@ services:
       KC_LOG_LEVEL: info
       KC_METRICS_ENABLED: "true"
       KC_HEALTH_ENABLED: "true"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/health/ready || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s    
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.keycloak.rule=Host(`${KEYCLOAK_DOMAIN}`)"
