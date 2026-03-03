@@ -8,10 +8,10 @@ services:
       - postgres_data:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: keycloak
-      POSTGRES_USER: keycloak
+      POSTGRES_USER: keycloak_user
       POSTGRES_PASSWORD: ${DB_PASSWORD} # Definir no Coolify/Env
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak"]
+      test: ["CMD-SHELL", "pg_isready -U keycloak_user -d keycloak"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -20,6 +20,11 @@ services:
     image: quay.io/keycloak/keycloak:24.0
     container_name: keycloak_app
     command: ["start", "--optimized"]
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM quay.io/keycloak/keycloak:24.0
+        RUN /opt/keycloak/bin/kc.sh build --db=postgres
     depends_on:
       postgres_keycloak:
         condition: service_healthy
@@ -27,7 +32,7 @@ services:
       # Configurações de Banco
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres_keycloak:5432/keycloak
-      KC_DB_USERNAME: keycloak
+      KC_DB_USERNAME: keycloak_user
       KC_DB_PASSWORD: ${DB_PASSWORD}
       
       # Configurações de Host e Proxy (Crítico para Traefik)
@@ -42,6 +47,7 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       
       # Otimização
+      KC_LOG_LEVEL: info
       KC_METRICS_ENABLED: "true"
       KC_HEALTH_ENABLED: "true"
     labels:
