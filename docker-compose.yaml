@@ -36,8 +36,8 @@ services:
       KC_DB_PASSWORD: ${DB_PASSWORD}
       
       # Configurações de Host e Proxy (Crítico para Traefik)
-      KC_HOSTNAME: ${KEYCLOAK_DOMAIN} # Ex: sso.seudominio.com
-      KC_HOSTNAME_STRICT: "true"
+      KC_HOSTNAME: sso.logtudo.com.br
+      KC_HOSTNAME_STRICT: "false"
       KC_HOSTNAME_STRICT_HTTPS: "true"
       KC_PROXY_HEADERS: xforwarded
       KC_HTTP_ENABLED: "true"
@@ -50,8 +50,12 @@ services:
       KC_LOG_LEVEL: info
       KC_METRICS_ENABLED: "true"
       KC_HEALTH_ENABLED: "true"
+    
+    expose:
+      - '8000'
+      
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/health/ready || exit 1"]
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8000/health/ready || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 5
@@ -62,7 +66,7 @@ services:
       - "traefik.http.routers.keycloak.entrypoints=websecure"
       - "traefik.http.routers.keycloak.tls=true"
       - "traefik.http.routers.keycloak.tls.certresolver=letsencrypt"
-      - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
+      - "traefik.http.services.keycloak.loadbalancer.server.port=8000"
       # Proteção extra: Headers de segurança
       - "traefik.http.middlewares.keycloak-headers.headers.browserXssFilter=true"
       - "traefik.http.middlewares.keycloak-headers.headers.contentTypeNosniff=true"
