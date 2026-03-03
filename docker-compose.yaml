@@ -19,6 +19,7 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:24.0
     container_name: keycloak_app
+    command: ["start", "--optimized"]
     depends_on:
       postgres_keycloak:
         condition: service_healthy
