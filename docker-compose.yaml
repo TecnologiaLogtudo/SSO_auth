@@ -10,18 +10,19 @@ services:
     environment:
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak_user
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Database password required}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U keycloak_user -d keycloak"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 20s
 
   keycloak:
     image: quay.io/keycloak/keycloak:24.0
     container_name: keycloak_app
     restart: unless-stopped
-    command: ["start","--optimized"]
+    command: start --optimized
     depends_on:
       postgres_keycloak:
         condition: service_healthy
@@ -31,19 +32,19 @@ services:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres_keycloak:5432/keycloak
       KC_DB_USERNAME: keycloak_user
-      KC_DB_PASSWORD: ${DB_PASSWORD}
+      KC_DB_PASSWORD: ${DB_PASSWORD:?Database password required}
 
-      # Hostname / Proxy (Traefik)
-      KC_HOSTNAME: sso.logtudo.com.br
+      # Proxy/Traefik (essencial para Coolify)
+      KC_PROXY: edge
       KC_PROXY_HEADERS: xforwarded
-      KC_HTTP_ENABLED: "true"
-      KC_PROXY: passthrough
-      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME: sso.logtudo.com.br  # Seu domínio
+      KC_HOSTNAME_STRICT: "false"      # Para debug; mude para true em prod
       KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HTTP_ENABLED: "true"
 
-      # Admin inicial
+      # Admin
       KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      KEYCLOAK_ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Admin password required}
 
       # Recursos
       KC_HEALTH_ENABLED: "true"
@@ -58,7 +59,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 10
-      start_period: 120s
+      start_period: 120s  # Keycloak demora para ficar pronto
 
     labels:
       - "traefik.enable=true"
