@@ -21,7 +21,7 @@ services:
     image: quay.io/keycloak/keycloak:24.0
     container_name: keycloak_app
     restart: unless-stopped
-    command: start
+    command: ["start","--optimized"]
     depends_on:
       postgres_keycloak:
         condition: service_healthy
@@ -37,6 +37,9 @@ services:
       KC_HOSTNAME: sso.logtudo.com.br
       KC_PROXY_HEADERS: xforwarded
       KC_HTTP_ENABLED: "true"
+      KC_PROXY: passthrough
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
 
       # Admin inicial
       KEYCLOAK_ADMIN: admin
@@ -53,9 +56,9 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/health/ready || exit 1"]
       interval: 30s
-      timeout: 5s
-      retries: 5
-      start_period: 40s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
 
     labels:
       - "traefik.enable=true"
