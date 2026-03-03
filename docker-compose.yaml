@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  postgres_keycloak:
+    image: postgres:16-alpine
+    container_name: keycloak_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD} # Definir no Coolify/Env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak_user -d keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: keycloak_app
+    depends_on:
+      postgres_keycloak:
+        condition: service_healthy
+    environment:
+      # Configurações de Banco
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres_keycloak:5432/keycloak
+      KC_DB_USERNAME: keycloak_user
+      KC_DB_PASSWORD: ${DB_PASSWORD}
+      
+      # Configurações de Host e Proxy (Crítico para Traefik)
+      KC_HOSTNAME: ${KEYCLOAK_DOMAIN} # Ex: sso.seudominio.com
+      KC_HOSTNAME_STRICT: "true"
+      KC_HOSTNAME_STRICT_HTTPS: "true"
+      KC_PROXY_HEADERS: xforwarded
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY: edge
+      
+      # Admin Inicial
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      
+      # Otimização
+      KC_METRICS_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.keycloak.rule=Host(`${KEYCLOAK_DOMAIN}`)"
+      - "traefik.http.routers.keycloak.entrypoints=websecure"
+      - "traefik.http.routers.keycloak.tls=true"
+      - "traefik.http.routers.keycloak.tls.certresolver=letsencrypt"
+      - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
+      # Proteção extra: Headers de segurança
+      - "traefik.http.middlewares.keycloak-headers.headers.browserXssFilter=true"
+      - "traefik.http.middlewares.keycloak-headers.headers.contentTypeNosniff=true"
+      - "traefik.http.middlewares.keycloak-headers.headers.forceSTSHeader=true"
+      - "traefik.http.middlewares.keycloak-headers.headers.stsSeconds=31536000"
+      - "traefik.http.routers.keycloak.middlewares=keycloak-headers"
+
+volumes:
+  postgres_data:
