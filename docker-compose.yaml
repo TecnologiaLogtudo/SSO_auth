@@ -37,7 +37,7 @@ services:
       KC_PROXY: edge
       KC_PROXY_HEADERS: xforwarded
       KC_HOSTNAME: sso.logtudo.com.br  # Seu domínio
-      KC_HOSTNAME_STRICT: "false"      # Para debug; mude para true em prod
+      KC_HOSTNAME_STRICT: "true"       # Para debug; mude para true em prod
       KC_HOSTNAME_STRICT_HTTPS: "false"
       KC_HTTP_ENABLED: "true"
 

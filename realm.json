@@ -1,0 +1,50 @@
+{
+  "id": "logtudo",
+  "realm": "logtudo",
+  "enabled": true,
+  "displayName": "LogTudo Identity Provider",
+  "displayNameHtml": "<div class='kc-logo-text'><span>LogTudo</span></div>",
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "registrationEmailAsUsername": false,
+  "rememberMe": true,
+  "verifyEmail": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "clients": [
+    {
+      "clientId": "hub-automacao",
+      "name": "Hub de Automação",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "ldene487enxhue4d48f7emjc",
+      "redirectUris": [
+        "https://automacao.logtudo.com/*"
+      ],
+      "webOrigins": [
+        "https://automacao.logtudo.com"
+      ],
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "serviceAccountsEnabled": true,
+      "fullScopeAllowed": true
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "admin",
+        "description": "Administrador de automações"
+      },
+      {
+        "name": "user",
+        "description": "Usuário padrão"
+      }
+    ]
+  },
+  "groups": [],
+  "keycloakVersion": "24.0.0"
+}
