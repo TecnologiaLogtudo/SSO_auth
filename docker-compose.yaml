@@ -19,9 +19,9 @@ services:
       start_period: 20s
 
   keycloak:
-    image: quay.io/keycloak/keycloak:24.0
+    build: .
     restart: unless-stopped
-    command: start
+    command: start --optimized --verbose
     depends_on:
       postgres_keycloak:
         condition: service_healthy
@@ -34,9 +34,8 @@ services:
       KC_DB_PASSWORD: ${DB_PASSWORD:?Database password required}
 
       # Proxy/Traefik (essencial para Coolify)
-      KC_PROXY: edge
       KC_PROXY_HEADERS: xforwarded
-      KC_HOSTNAME: sso.logtudo.com.br  # Seu domínio
+      KC_HOSTNAME: ${KC_HOSTNAME}      # Definido no Coolify
       KC_HOSTNAME_STRICT: "true"       # Para debug; mude para true em prod
       KC_HOSTNAME_STRICT_HTTPS: "false"
       KC_HTTP_ENABLED: "true"
@@ -46,8 +45,6 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Admin password required}
 
       # Recursos
-      KC_HEALTH_ENABLED: "true"
-      KC_METRICS_ENABLED: "true"
       KC_LOG_LEVEL: info
 
     expose:
@@ -62,7 +59,7 @@ services:
 
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.keycloak.rule=Host(`sso.logtudo.com.br`)"
+      - "traefik.http.routers.keycloak.rule=Host(`${KC_HOSTNAME}`)"
       - "traefik.http.routers.keycloak.entrypoints=websecure"
       - "traefik.http.routers.keycloak.tls=true"
       - "traefik.http.routers.keycloak.tls.certresolver=letsencrypt"
