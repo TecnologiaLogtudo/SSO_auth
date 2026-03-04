@@ -21,7 +21,7 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:24.0
     restart: unless-stopped
-    command: start --optimized
+    command: start
     depends_on:
       postgres_keycloak:
         condition: service_healthy
