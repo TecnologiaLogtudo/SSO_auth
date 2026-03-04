@@ -21,7 +21,7 @@ services:
   keycloak:
     build: .
     restart: unless-stopped
-    command: start --optimized --verbose
+    command: start --optimized
     depends_on:
       postgres_keycloak:
         condition: service_healthy
